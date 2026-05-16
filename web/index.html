@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>DSA Visualizer</title>
+  <meta name="description"
+    content="Interactive Algorithm & Data Structure Visualizer — step-by-step animation, live pseudo-code, benchmarking." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+</head>
+
+<body>
+
+  <!-- ═══════════════  TOP NAVIGATION BAR  ═══════════════ -->
+  <nav id="top-nav"
+    style="position: sticky; top: 0; z-index: 100; background: var(--bg-panel); border-bottom: 1px solid var(--border);">
+    <div class="nav-brand" style="cursor:pointer;" data-scroll-to="#section-home">
+      <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #8b5cf6;">
+        <polyline points="10 18 4 12 10 6"></polyline>
+        <polyline points="14 6 20 12 14 18"></polyline>
+      </svg>
+      <span class="nav-title">AlgoVisualizer</span>
+    </div>
+    <div class="nav-links" style="display:flex; gap:24px; align-items:center;">
+      <a class="nav-link" href="#" data-scroll-to="#section-home">Home</a>
+      <a class="nav-link" href="#" data-scroll-to="#section-visualizers">Visualizers <span
+          style="font-size:10px">▼</span></a>
+      <a class="nav-link" href="#" data-scroll-to="#section-benchmark">Benchmarks</a>
+      <a class="nav-link" href="#" data-scroll-to="#section-about">About</a>
+    </div>
+    <div class="nav-right" style="display:flex; gap:16px; align-items:center;">
+      <!-- Theme Toggle Switch (Moon/Sun icon) -->
+      <div id="theme-toggle" class="theme-toggle" title="Toggle Dark/Light mode"
+        style="cursor:pointer; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:transparent; border:none;">
+        <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </div>
+      <button class="btn btn-accent" style="border-radius:6px; padding:8px 16px; font-weight:600;"
+        data-scroll-to="#section-visualizers">Get Started</button>
+    </div>
+  </nav>
+
+  <!-- ═══════════════  MAIN CONTENT WRAPPER  ═══════════════ -->
+  <div id="app-container">
+
+    <!-- ─── HOME / LANDING VIEW ─── -->
+    <div id="view-home" class="view active">
+      <div class="home-scroll">
+        <div class="home-container">
+
+          <!-- Hero Section (2-column layout) -->
+          <section class="hero-section" id="section-home">
+            <div class="hero-content">
+              <div class="hero-badge">✦ Visualize · Learn · Master</div>
+              <h1 class="hero-title" style="font-size: 48px; line-height: 1.1; margin-bottom: 24px;">
+                Understand Algorithms<br>
+                <span style="color: #22d3ee;">Visually.</span> <span style="color: #c084fc;">Learn Deeply.</span>
+              </h1>
+              <p class="hero-subtitle" style="font-size: 16px; max-width: 400px;">
+                Interactive visualizations of algorithms and data structures to help you understand how they work, step
+                by step.
+              </p>
+              <div class="hero-cta" style="margin-top: 32px; display: flex; gap: 16px;">
+                <button class="btn btn-accent"
+                  style="background: linear-gradient(135deg, #4f46e5 0%, #a855f7 100%); border: none; padding: 12px 24px; display:flex; align-items:center; gap:8px;"
+                  data-scroll-to="#section-visualizers">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  Start Visualizing
+                </button>
+                <button class="btn btn-secondary"
+                  style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); display:flex; align-items:center; gap:8px;"
+                  data-scroll-to="#section-visualizers">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="9" y1="3" x2="9" y2="21"></line>
+                  </svg>
+                  Explore Algorithms
+                </button>
+              </div>
+
+              <!-- Small stats below hero buttons -->
+              <div style="display:flex; gap:16px; margin-top:40px;">
+                <div class="small-stat"
+                  style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; text-align: center; flex:1;">
+                  <div style="color: #22d3ee; font-weight: 700; font-size: 18px; margin-bottom: 4px;">3+</div>
+                  <div style="color: var(--text-dim); font-size: 11px;">Algorithms</div>
+                </div>
+                <div class="small-stat"
+                  style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; text-align: center; flex:1;">
+                  <div style="color: #22d3ee; font-weight: 700; font-size: 18px; margin-bottom: 4px;">4+</div>
+                  <div style="color: var(--text-dim); font-size: 11px;">Data Structures</div>
+                </div>
+                <div class="small-stat"
+                  style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; text-align: center; flex:1;">
+                  <div style="color: #22d3ee; font-weight: 700; font-size: 15px; margin-bottom: 4px; line-height:27px;">
+                    Interactive</div>
+                  <div style="color: var(--text-dim); font-size: 11px;">Step-by-step</div>
+                </div>
+                <div class="small-stat"
+                  style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; text-align: center; flex:1;">
+                  <div style="color: #c084fc; font-weight: 700; font-size: 15px; margin-bottom: 4px; line-height:27px;">
+                    Custom</div>
+                  <div style="color: var(--text-dim); font-size: 11px;">Input Data</div>
+                </div>
+              </div>
+            </div>
+            <div class="hero-visual" style="flex: 1.4;">
+              <!-- High-fidelity mockup card -->
+              <div class="preview-card"
+                style="width: 100%; border-radius: 12px; background: var(--bg-panel); border: 1px solid var(--border); box-shadow: var(--shadow-card); overflow: hidden; display:flex; flex-direction:column;">
+
+                <div class="preview-header"
+                  style="padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--bg-panel); display:flex; gap:20px; color:var(--text-dim); font-size:12px;">
+                  <span
+                    style="color:var(--text-primary); font-weight:600; border-bottom: 2px solid #a855f7; padding-bottom:12px; margin-bottom:-13px;">Quick
+                    Sort</span>
+                  <span>Merge Sort</span>
+                  <span>Heap Sort</span>
+                  <span>Bubble Sort</span>
+                </div>
+
+                <div class="preview-body" style="display:flex; padding: 20px; gap: 20px; background: var(--preview-body-bg);">
+
+                  <!-- Canvas Area -->
+                  <div class="preview-canvas-area" style="flex:2; display:flex; flex-direction:column;">
+                    <div style="margin-bottom:10px;">
+                      <span
+                        style="background:rgba(139,92,246,0.2); border: 1px solid rgba(139,92,246,0.3); color:#c084fc; padding:4px 8px; border-radius:6px; font-size:11px;">Pivot
+                        = 42</span>
+                    </div>
+                    <!-- Fake Bars -->
+                    <div class="preview-bars"
+                      style="display:flex; align-items:flex-end; justify-content:space-between; height:180px; width:100%; gap:4px; padding-bottom:8px; border-bottom:1px solid var(--preview-track);">
+                      <div style="flex:1; background:#06b6d4; height:34%; border-radius:2px 2px 0 0;"></div>
+                      <div style="flex:1; background:#06b6d4; height:10%; border-radius:2px 2px 0 0;"></div>
+                      <div style="flex:1; background:#06b6d4; height:23%; border-radius:2px 2px 0 0;"></div>
+                      <div style="flex:1; background:#06b6d4; height:33%; border-radius:2px 2px 0 0;"></div>
+                      <div style="flex:1; background:#06b6d4; height:15%; border-radius:2px 2px 0 0;"></div>
+                      <div style="flex:1; background:#ef4444; height:42%; border-radius:2px 2px 0 0;"></div>
+                      <div style="flex:1; background:#06b6d4; height:17%; border-radius:2px 2px 0 0;"></div>
+                      <div style="flex:1; background:#06b6d4; height:15%; border-radius:2px 2px 0 0;"></div>
+                      <div
+                        style="flex:1; background:#ef4444; height:55%; border-radius:2px 2px 0 0; position:relative;">
+                        <div
+                          style="position:absolute; width:100%; height:100%; box-shadow:0 0 10px rgba(59,130,246,0.8); border:1px solid #3b82f6;">
+                        </div>
+                      </div>
+                      <div style="flex:1; background:#f59e0b; height:28%; border-radius:2px 2px 0 0;"></div>
+                      <div style="flex:1; background:#06b6d4; height:10%; border-radius:2px 2px 0 0;"></div>
+                      <div style="flex:1; background:#06b6d4; height:49%; border-radius:2px 2px 0 0;"></div>
+                      <div style="flex:1; background:#06b6d4; height:37%; border-radius:2px 2px 0 0;"></div>
+                      <div style="flex:1; background:#06b6d4; height:21%; border-radius:2px 2px 0 0;"></div>
+                      <div style="flex:1; background:#06b6d4; height:11%; border-radius:2px 2px 0 0;"></div>
+                      <div style="flex:1; background:#06b6d4; height:27%; border-radius:2px 2px 0 0;"></div>
+                      <div style="flex:1; background:#06b6d4; height:10%; border-radius:2px 2px 0 0;"></div>
+                      <div style="flex:1; background:#06b6d4; height:25%; border-radius:2px 2px 0 0;"></div>
+                    </div>
+                    <div
+                      style="display:flex; justify-content:space-between; margin-top:16px; font-size:12px; color:var(--preview-text);">
+                      <span>Comparing <span style="color:#ef4444;">42</span> with <span
+                          style="color:#ef4444;">17</span></span>
+                      <span style="color:var(--text-dim);">Step 12 / 28</span>
+                    </div>
+                    <!-- Player controls -->
+                    <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
+                      <div style="width:100%; height:4px; background:var(--preview-track); border-radius:2px;">
+                        <div style="width:45%; height:100%; background:#a855f7; border-radius:2px; position:relative;">
+                          <div
+                            style="position:absolute; right:-4px; top:-3px; width:10px; height:10px; background:#c084fc; border-radius:50%;">
+                          </div>
+                        </div>
+                      </div>
+                      <div style="display:flex; gap:12px; color:var(--text-dim); margin-top:4px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                          <polygon points="5 4 15 12 5 20 5 4"></polygon>
+                          <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"></line>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Pseudo Code & Complexity Area -->
+                  <div class="preview-side-area" style="flex:1; display:flex; flex-direction:column; gap:16px;">
+                    <div
+                      style="background: var(--preview-panel-bg); border: 1px solid var(--preview-panel-border); border-radius:8px; padding:12px;">
+                      <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px;">Pseudo Code</div>
+                      <div
+                        style="font-family:'JetBrains Mono', monospace; font-size:10px; line-height:1.6; color:var(--preview-code);">
+                        <div><span style="color:#5c6bc0;">1</span> <span style="color:#c678dd;">quickSort</span>(arr,
+                          low, high)</div>
+                        <div><span style="color:#5c6bc0;">2</span> &nbsp;&nbsp;<span style="color:#c678dd;">if</span>
+                          low < high</div>
+                            <div style="background:var(--preview-code-line); padding-left:4px;"><span
+                                style="color:#5c6bc0;">3</span> &nbsp;&nbsp;&nbsp;&nbsp;pivotIndex = partition(arr, low,
+                              high)</div>
+                            <div><span style="color:#5c6bc0;">4</span> &nbsp;&nbsp;&nbsp;&nbsp;<span
+                                style="color:#c678dd;">quickSort</span>(arr, low, pivotIndex - 1)</div>
+                            <div><span style="color:#5c6bc0;">5</span> &nbsp;&nbsp;&nbsp;&nbsp;<span
+                                style="color:#c678dd;">quickSort</span>(arr, pivotIndex + 1, high)</div>
+                        </div>
+                      </div>
+                      <div
+                        style="background: var(--preview-panel-bg); border: 1px solid var(--preview-panel-border); border-radius:8px; padding:12px;">
+                        <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px;">Time Complexity</div>
+                        <div style="font-size:11px; line-height:1.8; color:var(--preview-code);">
+                          <div><span style="color:var(--text-dim);">Best:</span> O(n log n)</div>
+                          <div><span style="color:var(--text-dim);">Average:</span> O(n log n)</div>
+                          <div><span style="color:var(--text-dim);">Worst:</span> O(n²)</div>
+                          <div><span style="color:var(--text-dim);">Space:</span> O(log n)</div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+          </section>
+
+          <!-- Feature Strip -->
+          <div class="feature-strip"
+            style="display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; margin: 40px 0;">
+            <div class="feature-item"
+              style="background:var(--bg-card); border:1px solid var(--border); padding:20px; border-radius:12px; display:flex; flex-direction:column; align-items:flex-start; text-align:left; gap:12px;">
+              <div style="padding:10px; background:rgba(139,92,246,0.1); border-radius:8px; color:#c084fc;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z">
+                  </path>
+                  <path
+                    d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z">
+                  </path>
+                  <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path>
+                  <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
+                </svg>
+              </div>
+              <div>
+                <div style="font-weight:600; font-size:14px; margin-bottom:4px;">Step-by-Step Execution</div>
+                <div style="font-size:12px; color:var(--text-dim); line-height:1.5;">See each operation performed in
+                  real-time with detailed explanations.</div>
+              </div>
+            </div>
+
+            <div class="feature-item"
+              style="background:var(--bg-card); border:1px solid var(--border); padding:20px; border-radius:12px; display:flex; flex-direction:column; align-items:flex-start; text-align:left; gap:12px;">
+              <div style="padding:10px; background:rgba(139,92,246,0.1); border-radius:8px; color:#c084fc;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="16 18 22 12 16 6"></polyline>
+                  <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+              </div>
+              <div>
+                <div style="font-weight:600; font-size:14px; margin-bottom:4px;">Multiple Algorithms</div>
+                <div style="font-size:12px; color:var(--text-dim); line-height:1.5;">Explore basic algorithms across
+                  sorting, searching, and data structures.</div>
+              </div>
+            </div>
+
+            <div class="feature-item"
+              style="background:var(--bg-card); border:1px solid var(--border); padding:20px; border-radius:12px; display:flex; flex-direction:column; align-items:flex-start; text-align:left; gap:12px;">
+              <div style="padding:10px; background:rgba(139,92,246,0.1); border-radius:8px; color:#c084fc;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <path d="M12 2v2"></path>
+                  <path d="M12 20v2"></path>
+                  <path d="M5 5l1.5 1.5"></path>
+                  <path d="M17.5 17.5L19 19"></path>
+                  <path d="M2 12h2"></path>
+                  <path d="M20 12h2"></path>
+                  <path d="M5 19l1.5-1.5"></path>
+                  <path d="M17.5 6.5L19 5"></path>
+                </svg>
+              </div>
+              <div>
+                <div style="font-weight:600; font-size:14px; margin-bottom:4px;">Interactive Learning</div>
+                <div style="font-size:12px; color:var(--text-dim); line-height:1.5;">Adjust inputs, control speed, and
+                  experiment to build deep understanding.</div>
+              </div>
+            </div>
+
+            <div class="feature-item"
+              style="background:var(--bg-card); border:1px solid var(--border); padding:20px; border-radius:12px; display:flex; flex-direction:column; align-items:flex-start; text-align:left; gap:12px;">
+              <div style="padding:10px; background:rgba(139,92,246,0.1); border-radius:8px; color:#c084fc;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 3v18h18"></path>
+                  <path d="M18 9l-5 5-4-4-5 5"></path>
+                  <path d="M18 9h-4"></path>
+                  <path d="M18 9v4"></path>
+                </svg>
+              </div>
+              <div>
+                <div style="font-weight:600; font-size:14px; margin-bottom:4px;">Performance Insights</div>
+                <div style="font-size:12px; color:var(--text-dim); line-height:1.5;">Analyze time and space complexity
+                  with detailed algorithmic metrics.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Visualizers -->
+          <section class="home-section" id="section-visualizers">
+            <h2 class="home-heading">Visualizers</h2>
+            <p class="home-subtitle">Algorithms & Data Structures</p>
+            
+            <div class="home-grid home-grid--2col" style="margin-bottom: 12px;">
+              <!-- Sorting Card -->
+              <div class="home-card home-card--active" data-navigate="sort" id="card-sorting">
+                <div class="home-card-header">
+                  <h3 class="home-card-name">Sorting Algorithms</h3>
+                  <div class="home-card-badges">
+                    <span class="badge badge-green">beginner</span>
+                    <span class="badge badge-outline">array</span>
+                  </div>
+                </div>
+                <p class="home-card-desc">Efficient comparison-based algorithms that arrange elements in a specific order, optimizing for time and space complexity.</p>
+                <div class="home-card-stats">
+                  <div class="stat-item">
+                    <svg viewBox="0 0 24 24" class="icon-line"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>Time:</span>
+                    <span class="stat-val">O(n log n)</span>
+                  </div>
+                  <div class="stat-item">
+                    <svg viewBox="0 0 24 24" class="icon-line"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    <span>Space:</span>
+                    <span class="stat-val">O(1)</span>
+                  </div>
+                </div>
+                <div class="home-card-tags">
+                  <span>sorting</span>
+                  <span>comparison</span>
+                  <span>stable</span>
+                  <span>adaptive</span>
+                </div>
+                <button class="btn btn-accent btn-visualize">
+                  Visualize Algorithm
+                  <svg viewBox="0 0 24 24" class="icon-line"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+              </div>
+
+              <!-- Searching Card -->
+              <div class="home-card home-card--active" data-navigate="search" id="card-searching">
+                <div class="home-card-header">
+                  <h3 class="home-card-name">Searching Algorithms</h3>
+                  <div class="home-card-badges">
+                    <span class="badge badge-green">beginner</span>
+                    <span class="badge badge-outline">array</span>
+                  </div>
+                </div>
+                <p class="home-card-desc">Techniques to locate a specific element within a data structure, ranging from linear scans to optimized binary searches.</p>
+                <div class="home-card-stats">
+                  <div class="stat-item">
+                    <svg viewBox="0 0 24 24" class="icon-line"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>Time:</span>
+                    <span class="stat-val">O(log n)</span>
+                  </div>
+                  <div class="stat-item">
+                    <svg viewBox="0 0 24 24" class="icon-line"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    <span>Space:</span>
+                    <span class="stat-val">O(1)</span>
+                  </div>
+                </div>
+                <div class="home-card-tags">
+                  <span>searching</span>
+                  <span>binary</span>
+                  <span>sorted</span>
+                </div>
+                <button class="btn btn-accent btn-visualize">
+                  Visualize Algorithm
+                  <svg viewBox="0 0 24 24" class="icon-line"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="home-grid">
+              <!-- Stack Card -->
+              <div class="home-card home-card--active" data-navigate-ds="stack">
+                <div class="home-card-header">
+                  <h3 class="home-card-name">Stack</h3>
+                  <div class="home-card-badges">
+                    <span class="badge badge-green">beginner</span>
+                  </div>
+                </div>
+                <p class="home-card-desc">LIFO (Last-In-First-Out) linear structure for managing elements with push and pop operations.</p>
+                <div class="home-card-stats">
+                  <div class="stat-item">
+                    <svg viewBox="0 0 24 24" class="icon-line"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>Push/Pop:</span>
+                    <span class="stat-val">O(1)</span>
+                  </div>
+                </div>
+                <button class="btn btn-accent btn-visualize">
+                  Visualize Structure
+                  <svg viewBox="0 0 24 24" class="icon-line"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+              </div>
+
+              <!-- Queue Card -->
+              <div class="home-card home-card--active" data-navigate-ds="queue">
+                <div class="home-card-header">
+                  <h3 class="home-card-name">Queue</h3>
+                  <div class="home-card-badges">
+                    <span class="badge badge-green">beginner</span>
+                  </div>
+                </div>
+                <p class="home-card-desc">FIFO (First-In-First-Out) linear structure that manages elements in the order they arrive.</p>
+                <div class="home-card-stats">
+                  <div class="stat-item">
+                    <svg viewBox="0 0 24 24" class="icon-line"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>Enq/Deq:</span>
+                    <span class="stat-val">O(1)</span>
+                  </div>
+                </div>
+                <button class="btn btn-accent btn-visualize">
+                  Visualize Structure
+                  <svg viewBox="0 0 24 24" class="icon-line"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+              </div>
+
+              <!-- Linked List Card -->
+              <div class="home-card home-card--active" data-navigate-ds="linkedlist">
+                <div class="home-card-header">
+                  <h3 class="home-card-name">Linked List</h3>
+                  <div class="home-card-badges">
+                    <span class="badge badge-green">beginner</span>
+                  </div>
+                </div>
+                <p class="home-card-desc">A sequence of nodes where each element points to the next, allowing for efficient insertion/deletion.</p>
+                <div class="home-card-stats">
+                  <div class="stat-item">
+                    <svg viewBox="0 0 24 24" class="icon-line"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>Insert:</span>
+                    <span class="stat-val">O(1)</span>
+                  </div>
+                </div>
+                <button class="btn btn-accent btn-visualize">
+                  Visualize Structure
+                  <svg viewBox="0 0 24 24" class="icon-line"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+              </div>
+
+              <!-- BST Card -->
+              <div class="home-card home-card--active" data-navigate-ds="bst">
+                <div class="home-card-header">
+                  <h3 class="home-card-name">Binary Tree</h3>
+                  <div class="home-card-badges">
+                    <span class="badge badge-green">intermediate</span>
+                  </div>
+                </div>
+                <p class="home-card-desc">Hierarchical structure where each node has at most two children, optimized for fast searching and sorting.</p>
+                <div class="home-card-stats">
+                  <div class="stat-item">
+                    <svg viewBox="0 0 24 24" class="icon-line"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>Search:</span>
+                    <span class="stat-val">O(log n)</span>
+                  </div>
+                </div>
+                <button class="btn btn-accent btn-visualize">
+                  Visualize Structure
+                  <svg viewBox="0 0 24 24" class="icon-line"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section C: Benchmark -->
+          <section class="home-section" id="section-benchmark">
+            <h2 class="home-heading">Benchmarking</h2>
+            <p class="home-subtitle">Real-world performance testing</p>
+            <div class="info-card" style="padding:32px; background:var(--bg-card); text-align:left;">
+              <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; margin-bottom:20px;">
+                <div>
+                  <p style="font-size:15px; color:var(--text-primary); font-weight:600; margin-bottom:4px;">Practice Performance Testing</p>
+                  <p style="font-size:13px; color:var(--text-dim);">Comparing QuickSort, HeapSort, and MergeSort</p>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <span style="background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.2); color:var(--accent); padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600;">N = 1,000,000</span>
+                  <span style="background:rgba(34,211,238,0.1); border:1px solid rgba(34,211,238,0.2); color:var(--bar-default); padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600;">Repeats = 10</span>
+                </div>
+              </div>
+              <p style="margin-bottom:14px; font-size:14px; color:var(--text-secondary); line-height:1.6;">
+                The system randomly generates an array containing <strong>1,000,000 elements</strong> and repeatedly executes the sorting process <strong>10 times</strong> for each algorithm. Streaming logs appear below, followed by an automated performance comparison chart.
+              </p>
+
+              <div class="benchmark-note">
+                <svg class="icon-line" viewBox="0 0 24 24" style="color:var(--bar-compare); margin-top:1px;"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path></svg>
+                <span>This benchmark can take a few minutes. Cancel stops the suite after the current timed run finishes.</span>
+              </div>
+
+              <div style="display:flex; gap:16px; align-items:center; margin-bottom:24px;">
+                <button class="btn btn-accent btn-with-icon" id="btn-inline-run-benchmark" style="padding:12px 24px; font-size:14px; font-weight:600; width:auto;">
+                  <svg class="icon-line" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                  <span>Start Live Benchmark</span>
+                </button>
+                <button class="btn btn-secondary btn-with-icon hidden" id="btn-inline-cancel-benchmark" style="padding:12px 18px; font-size:14px; font-weight:600; width:auto;">
+                  <svg class="icon-line" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                  <span>Cancel</span>
+                </button>
+                <span id="inline-benchmark-status" style="font-size:13px; color:var(--text-dim);">Ready to run</span>
+              </div>
+
+              <div class="benchmark-progress">
+                <div id="inline-benchmark-progress-fill" class="benchmark-progress-fill"></div>
+              </div>
+
+              <!-- Console Output Container -->
+              <div style="background:var(--bg-canvas); border:1px solid var(--border); border-radius:8px; padding:16px; font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--text-primary); max-height:280px; overflow-y:auto; margin-bottom:24px;">
+                <pre id="inline-benchmark-output" style="margin:0; white-space:pre-wrap; color:var(--text-secondary);">Click "Start Live Benchmark" to begin performance suite...</pre>
+              </div>
+
+              <!-- Visual Charts Container -->
+              <div id="inline-charts-container" class="hidden" style="background:rgba(0,0,0,0.2); border:1px solid var(--border); border-radius:8px; padding:20px;">
+                <p style="font-size:13px; color:var(--text-primary); font-weight:600; margin-bottom:16px; display:flex; align-items:center; gap:6px;">
+                  <svg class="icon-line" viewBox="0 0 24 24" style="color:var(--accent);"><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-4"></path></svg>
+                  <span>Average Execution Time Comparison (Lower is Better)</span>
+                </p>
+                <div id="inline-charts-bars" style="display:flex; flex-direction:column; gap:16px;"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section D: About -->
+          <section class="home-section" id="section-about">
+            <h2 class="home-heading">About Project & Core Architecture</h2>
+            <p class="home-subtitle">Mini Project Report & System Design</p>
+            <div class="info-card" style="padding:32px; background:var(--bg-card);">
+              <p style="margin-bottom:16px; font-size:15px; color:var(--text-secondary); line-height:1.6;">
+                <strong>DSA Visualizer</strong> is a highly decoupled educational platform designed to bridge the gap between abstract algorithmic logic and interactive visual feedback.
+              </p>
+              
+              <h3 style="font-size:14px; margin: 24px 0 12px; color:var(--text-primary);">Core Architectural Highlights:</h3>
+              <ul style="margin-bottom:24px; font-size:14px; color:var(--text-dim); line-height:1.7; padding-left: 20px;">
+                <li><strong>Python Generator-Based Simulation:</strong> The backend core leverages Python's <code>yield</code> generators to lazily evaluate and capture discrete algorithmic states (comparisons, swaps, variable updates). This approach ensures true "step-by-step" execution without complex threading or blocking operations.</li>
+                <li><strong>Complete Decoupling (Eel Bridge):</strong> The heavy lifting of the algorithm logic and benchmarking is fully isolated in the Python backend. The frontend (HTML/JS/CSS) is completely agnostic to the algorithmic implementation and only acts as a dumb renderer subscribing to the backend's state events via the Eel WebSockets bridge.</li>
+                <li><strong>High-Performance Event Logging:</strong> By serializing state changes into lightweight JSON "Steps", the system can instantly record an entire sorting/searching process of a large dataset and playback locally without constant client-server roundtrips, eliminating visual lag.</li>
+                <li><strong>Stateless DOM Manipulation:</strong> The UI dynamically reconstructs visual components directly from the incoming data snapshots (Array states, active indices), making features like "Rewind" or "Theme Switching" reliable and robust.</li>
+              </ul>
+              
+              <a href="https://github.com/poundvn07/DSA-Visualizer" target="_blank" class="btn btn-secondary"
+                style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+                  </path>
+                </svg>
+                View Source on GitHub
+              </a>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── ALGORITHMS VISUALIZER VIEW ─── -->
+    <div id="view-algorithms" class="view">
+
+      <!-- [1] CONFIG PANEL (left sidebar) -->
+      <aside id="config-panel">
+        <button id="btn-back-home" class="btn btn-secondary btn-with-icon" style="margin-bottom:8px; width:fit-content; padding:0 12px;">
+          <svg class="icon-line" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg>
+          <span>Back</span>
+        </button>
+        <h2 class="panel-title" style="display:flex; align-items:center; gap:8px;">
+          <svg class="icon-line" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
+          <span>Configuration</span>
+        </h2>
+        <div class="config-divider"></div>
+
+        <!-- ── Algorithm Setup ── -->
+        <label class="config-label">Algorithm Setup</label>
+        <!-- Type toggle -->
+        <div class="toggle-group" id="type-toggle">
+          <button class="toggle-btn active" data-value="sort">Sorting</button>
+          <button class="toggle-btn" data-value="search">Searching</button>
+        </div>
+
+        <!-- Algorithm dropdown -->
+        <select id="algo-select" class="config-select">
+          <option value="quicksort">QuickSort</option>
+          <option value="heapsort">HeapSort</option>
+          <option value="mergesort">MergeSort</option>
+        </select>
+
+        <!-- Pivot Strategy selector (QuickSort only) -->
+        <div id="pivot-group" class="config-row" style="display:none;">
+          <select id="pivot-select" class="config-select">
+            <option value="last">Last element</option>
+            <option value="first">First element</option>
+            <option value="middle">Middle element</option>
+            <option value="median3">Median of three</option>
+          </select>
+        </div>
+
+        <div class="config-divider"></div>
+
+        <!-- ── Playback Controls ── -->
+        <label class="config-label">Playback Controls</label>
+
+        <!-- Speed -->
+        <div class="slider-row">
+          <span class="slider-label">Delay</span>
+          <input type="range" id="speed-slider" min="0.5" max="4.0" step="0.1" value="1.0" />
+          <span id="speed-value" class="speed-tooltip-host">1.0x
+            <div class="tooltip-box">100 ms per step</div>
+          </span>
+        </div>
+
+        <div class="playback-grid" style="display:flex; flex-direction:column; gap:6px;">
+          <button id="btn-play" class="btn btn-accent ctrl-play btn-with-icon" style="width:100%;">
+            <svg class="icon-line" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Play</span>
+          </button>
+          <div style="display:flex; gap:6px; width:100%;">
+            <button id="btn-step-back" class="btn btn-secondary btn-with-icon" style="flex:1;">
+              <svg class="icon-line" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg>
+              <span>&lt; Step</span>
+            </button>
+            <button id="btn-step-fwd" class="btn btn-secondary btn-with-icon" style="flex:1;">
+              <svg class="icon-line" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg>
+              <span>Step &gt;</span>
+            </button>
+          </div>
+          <button id="btn-reset" class="btn btn-secondary ctrl-reset btn-with-icon" style="width:100%;">
+            <svg class="icon-line" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+            <span>Reset</span>
+          </button>
+        </div>
+
+        <div class="config-divider"></div>
+
+        <!-- ── Data Input ── -->
+        <label class="config-label">Data Input</label>
+
+        <!-- Array Size -->
+        <div class="slider-row">
+          <span class="slider-label">Size</span>
+          <input type="range" id="size-slider" min="5" max="200" value="50" />
+          <span id="size-value" class="slider-value">50</span>
+        </div>
+
+        <!-- Data Input Buttons -->
+        <div class="data-input-grid" style="margin-top:8px;">
+          <div id="input-type-chips" style="display:contents;">
+            <button class="btn btn-secondary chip active" data-value="random">Random</button>
+            <button class="btn btn-secondary chip" data-value="sorted">Sorted</button>
+            <button class="btn btn-secondary chip" data-value="reversed">Reversed</button>
+          </div>
+          <button class="btn btn-secondary"
+            onclick="document.getElementById('custom-array-group').classList.toggle('hidden')">Custom Array</button>
+        </div>
+
+        <!-- Search target -->
+        <div id="search-target-group" class="hidden">
+          <input type="number" id="search-target" class="config-input" placeholder="Search target..."
+            style="margin-top:8px;" />
+        </div>
+
+        <!-- Custom Array Input -->
+        <div id="custom-array-group" class="custom-array-group hidden" style="margin-top:8px; display:flex; gap:6px;">
+          <input id="custom-input" type="text" class="config-input" placeholder="e.g. 5, 3, 8"
+            title="Comma-separated integers" style="flex:1;" />
+          <button id="btn-apply-custom" class="btn btn-accent" style="width:auto; padding:0 12px;">Apply</button>
+        </div>
+
+        <div class="config-divider" style="margin-top:auto;"></div>
+
+        <!-- ── Utilities ── -->
+        <label class="config-label">Utilities</label>
+        <div class="utilities-grid">
+          <button id="btn-new" class="btn btn-secondary btn-with-icon" style="grid-column: 1 / -1;">
+            <svg class="icon-line" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 6h18"></path>
+              <path d="M7 12h10"></path>
+              <path d="M10 18h4"></path>
+              <path d="M17 3l4 3-4 3"></path>
+            </svg>
+            <span>New Array</span>
+          </button>
+          <button id="btn-help" class="btn btn-secondary btn-with-icon" style="grid-column: 1 / -1;">
+            <svg class="icon-line" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M9.75 9.5a2.35 2.35 0 0 1 4.5 1c0 1.6-2.25 1.85-2.25 3.5"></path>
+              <path d="M12 17.5h.01"></path>
+            </svg>
+            <span>Tutorial</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- RIGHT COLUMN -->
+      <main id="main-area">
+
+        <!-- [2] CANVAS AREA -->
+        <section id="canvas-section">
+          <!-- Embedded Top Bar in Canvas -->
+          <div class="canvas-top-bar">
+            <!-- Color legend embedded in canvas -->
+            <div id="color-legend" class="legend-wrap"></div>
+          </div>
+
+          <canvas id="viz-canvas"></canvas>
+
+          <div class="canvas-bottom-bar">
+            <div id="nl-explanation" class="nl-explanation"></div>
+            <div class="progress-footer">
+              <div id="status-label">Ready — generate a new array to begin</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Execution Progress -->
+        <section id="execution-progress" class="info-card" style="padding: 12px 16px; margin-bottom: 8px;">
+          <div class="progress-header"
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span class="info-title" style="margin: 0;">Execution Progress</span>
+            <span id="progress-label">Step 0 / 0</span>
+          </div>
+          <div id="progress-wrap">
+            <div id="progress-fill"></div>
+          </div>
+        </section>
+
+        <!-- [3] 3-COLUMN INFO PANELS -->
+        <section id="info-panels">
+
+          <!-- Column 1: Pseudo-code -->
+          <div id="pseudocode-panel" class="info-card">
+            <h3 class="info-title">Pseudo Code</h3>
+            <div class="info-divider"></div>
+            <div id="pseudocode-lines" class="pseudocode-scroll"></div>
+          </div>
+
+          <!-- Column 2: Variables -->
+          <div id="variables-panel" class="info-card">
+            <h3 class="info-title">Variables</h3>
+            <div class="info-divider"></div>
+            <div id="stats-content">
+              <div class="stat-row"><span class="stat-key">Algorithm:</span><span id="stat-algo"
+                  class="stat-val">—</span></div>
+              <div class="stat-row"><span class="stat-key">N:</span><span id="stat-n" class="stat-val">—</span></div>
+              <div class="stat-row"><span class="stat-key">Comparisons:</span><span id="stat-comp"
+                  class="stat-val">0</span></div>
+              <div class="stat-row" id="stat-row-swaps"><span class="stat-key">Swaps:</span><span id="stat-swaps" class="stat-val">0</span>
+              </div>
+              <div class="stat-row stat-search-row hidden"><span class="stat-key">Target:</span><span id="stat-target"
+                  class="stat-val">—</span></div>
+              <div class="stat-row stat-search-row hidden"><span class="stat-key">Low:</span><span id="stat-low"
+                  class="stat-val">—</span></div>
+              <div class="stat-row stat-search-row hidden"><span class="stat-key">Mid:</span><span id="stat-mid"
+                  class="stat-val">—</span></div>
+              <div class="stat-row stat-search-row hidden"><span class="stat-key">High:</span><span id="stat-high"
+                  class="stat-val">—</span></div>
+              <div class="stat-row"><span class="stat-key">Step:</span><span id="stat-step" class="stat-val">0 /
+                  0</span></div>
+            </div>
+          </div>
+
+          <!-- Column 3: Complexity -->
+          <div id="complexity-panel" class="info-card">
+            <h3 class="info-title">Complexity</h3>
+            <div class="info-divider"></div>
+            <!-- Complexity badge from earlier -->
+            <div id="complexity-badge" class="complexity-badge"></div>
+          </div>
+
+        </section>
+      </main>
+    </div>
+
+    <!-- ─── DATA STRUCTURES VISUALIZER VIEW ─── -->
+    <div id="view-ds" class="view">
+      <aside id="ds-config-panel">
+        <button id="btn-ds-back-home" class="btn btn-secondary btn-with-icon" style="margin-bottom:8px; width:fit-content; padding:0 12px;">
+          <svg class="icon-line" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg>
+          <span>Back</span>
+        </button>
+        <h2 class="panel-title" id="ds-panel-title" style="display:flex; align-items:center; gap:8px;">
+          <svg class="icon-line" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
+          <span id="ds-panel-title-text">Stack</span>
+        </h2>
+        <div class="config-divider"></div>
+
+        <label class="config-label">Value</label>
+          <input id="ds-value-input" type="number" class="config-input" placeholder="Enter integer…" />
+
+        <div class="config-divider"></div>
+        <label class="config-label">Operations</label>
+        <div id="ds-op-buttons" class="ds-op-grid"></div>
+
+        <div class="config-divider"></div>
+        <!-- ── Playback Controls ── -->
+        <label class="config-label">Playback Controls</label>
+        
+        <div class="slider-row" style="margin-bottom: 8px;">
+          <span class="slider-label">Speed</span>
+          <input type="range" id="ds-speed-slider" min="0.5" max="4.0" step="0.1" value="1.0" />
+          <span id="ds-speed-value" class="speed-tooltip-host">1.0x
+            <div class="tooltip-box">250 ms per step</div>
+          </span>
+        </div>
+
+        <section id="ds-control-bar" class="playback-grid" style="display:flex; flex-direction:column; gap:6px;">
+          <button id="btn-ds-play" class="btn btn-accent ctrl-play btn-with-icon" style="width:100%;">
+            <svg class="icon-line" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Play</span>
+          </button>
+          <div style="display:flex; gap:6px; width:100%;">
+            <button id="btn-ds-step-back" class="btn btn-secondary btn-with-icon" style="flex:1;">
+              <svg class="icon-line" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg>
+              <span>Prev</span>
+            </button>
+            <button id="btn-ds-step-fwd" class="btn btn-secondary btn-with-icon" style="flex:1;">
+              <svg class="icon-line" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg>
+              <span>Step</span>
+            </button>
+          </div>
+          <button id="btn-ds-reset" class="btn btn-secondary ctrl-reset btn-with-icon" style="width:100%;">
+            <svg class="icon-line" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+            <span>Reset</span>
+          </button>
+        </section>
+
+        <div class="config-divider" style="margin-top:auto;"></div>
+        <button id="btn-ds-clear" class="btn btn-accent btn-with-icon">
+          <svg class="icon-line" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          <span>Clear All</span>
+        </button>
+      </aside>
+
+      <main id="ds-main-area">
+        <section id="ds-canvas-section">
+          <canvas id="ds-canvas"></canvas>
+          <div id="ds-status-label" class="nl-explanation"></div>
+        </section>
+
+        <section id="ds-info-panels">
+          <div class="info-card">
+            <h3 class="info-title info-title-with-icon">
+              <svg class="icon-line" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 6h12"></path>
+                <path d="M8 12h12"></path>
+                <path d="M8 18h12"></path>
+                <path d="M3 6h.01"></path>
+                <path d="M3 12h.01"></path>
+                <path d="M3 18h.01"></path>
+              </svg>
+              <span>Pseudo-code</span>
+            </h3>
+            <div class="info-divider"></div>
+            <div id="ds-pseudocode-lines" class="pseudocode-scroll"></div>
+          </div>
+          <div class="info-card">
+            <h3 class="info-title info-title-with-icon">
+              <svg class="icon-line" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 19V5"></path>
+                <path d="M4 19h16"></path>
+                <path d="M8 16v-4"></path>
+                <path d="M12 16V8"></path>
+                <path d="M16 16v-6"></path>
+              </svg>
+              <span>Status</span>
+            </h3>
+            <div class="info-divider"></div>
+            <div id="ds-stats-content">
+              <div class="stat-row"><span class="stat-key">DS Type:</span><span id="ds-stat-type"
+                  class="stat-val">—</span></div>
+              <div class="stat-row"><span class="stat-key">Size:</span><span id="ds-stat-size" class="stat-val">0</span>
+              </div>
+              <div class="stat-row"><span class="stat-key">Operations:</span><span id="ds-stat-ops"
+                  class="stat-val">0</span></div>
+              <div class="stat-row"><span class="stat-key">Step:</span><span id="ds-stat-step" class="stat-val">0 /
+                  0</span></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- ═══════════════  HELP MODAL  ═══════════════ -->
+  <div id="help-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="display:flex; align-items:center; gap:8px;">
+          <svg class="icon-line" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M9.75 9.5a2.35 2.35 0 0 1 4.5 1c0 1.6-2.25 1.85-2.25 3.5"></path><path d="M12 17.5h.01"></path></svg>
+          <span>Help &amp; Tutorial</span>
+        </h3>
+        <button id="help-close" class="modal-close-btn">✕</button>
+      </div>
+      <div class="help-body">
+        <p><strong>Algorithm Visualizer &amp; Benchmarking</strong></p>
+        <ol>
+          <li>Select algorithm type (<em>Sorting</em> / <em>Searching</em>)</li>
+          <li>Choose an algorithm from the dropdown</li>
+          <li>Adjust array size and speed with sliders</li>
+          <li>Pick input type (Random / Sorted / Reversed)</li>
+          <li>Click <strong>New</strong> to generate a fresh array</li>
+          <li>Use <strong>Play</strong> for continuous animation, or <strong>Step</strong> buttons for manual control
+          </li>
+          <li><strong>⏪ Step</strong> goes backward through cached steps</li>
+          <li><strong>Reset</strong> returns to the initial array</li>
+          <li>Click a bar to edit its value (idle mode only)</li>
+          <li>Enter comma-separated values in <strong>Custom Array</strong> and click Apply</li>
+        </ol>
+        <h4>Colour Legend</h4>
+        <div class="legend-grid">
+          <span class="legend-swatch" style="background:var(--bar-default);"></span><span>Default</span>
+          <span class="legend-swatch" style="background:var(--bar-compare);"></span><span>Comparing</span>
+          <span class="legend-swatch" style="background:var(--bar-swap);"></span><span>Swap</span>
+          <span class="legend-swatch" style="background:var(--bar-pivot);"></span><span>Pivot</span>
+          <span class="legend-swatch" style="background:var(--bar-found);"></span><span>Found / Done</span>
+          <span class="legend-swatch" style="background:var(--bar-set);"></span><span>Set / Place</span>
+          <span class="legend-swatch" style="background:var(--bar-range);"></span><span>Range</span>
+        </div>
+        <h4>Keyboard Shortcuts</h4>
+        <div class="legend-grid shortcut-grid">
+          <span style="font-family:var(--font-mono);">Space</span><span>Play / Pause</span>
+          <span style="font-family:var(--font-mono);">→</span><span>Step forward</span>
+          <span style="font-family:var(--font-mono);">←</span><span>Step backward</span>
+          <span style="font-family:var(--font-mono);">N</span><span>New array</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════  SCRIPTS  ═══════════════ -->
+  <script src="/eel.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/ds_renderer.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/pseudocode.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/benchmark.js"></script>
+  <script src="js/modules/algorithms.js"></script>
+  <script src="js/bridge.js"></script>
+</body>
+
+</html>
