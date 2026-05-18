@@ -1140,6 +1140,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-height: 54px;
 }
 
 .home-card-name {
@@ -1178,6 +1179,7 @@ body {
   color: var(--text-secondary);
   line-height: 1.5;
   margin: 0;
+  min-height: 60px;
 }
 
 .home-card-stats {
