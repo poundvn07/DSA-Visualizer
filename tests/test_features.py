@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Quick smoke test for Features 7 & 9."""
+"""File này test nhanh một vài tính năng của thuật toán.
+
+Nó kiểm tra pivot của QuickSort, mô tả bước và việc đổi Step sang JSON.
+"""
 from src.core.algorithms import quick_sort_gen, heap_sort_gen, merge_sort_gen, binary_search_gen
 from dataclasses import asdict
 import json

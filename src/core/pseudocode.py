@@ -1,9 +1,6 @@
-"""Pseudo-code mappings for algorithm visualization.
+"""File này lưu giả mã cho thuật toán và cấu trúc dữ liệu.
 
-Each algorithm is associated with a list of human-readable pseudo-code
-lines.  The ``highlight_line`` field in :class:`~src.core.step.Step`
-refers to the **zero-based index** into the corresponding list so the
-UI can highlight the currently executing line.
+Giao diện dùng danh sách này để tô sáng dòng đang chạy.
 """
 
 from __future__ import annotations
@@ -130,15 +127,12 @@ PSEUDOCODE: Dict[str, List[str]] = {
 }
 
 def get_pseudocode(algorithm_name: str) -> List[str]:
-    """Return the pseudo-code listing for the given algorithm.
-
+    """Lấy giả mã theo tên thuật toán hoặc cấu trúc dữ liệu.
+    
     Args:
-        algorithm_name: Key into :data:`PSEUDOCODE`, e.g. ``"QuickSort"``.
-
-    Returns:
-        A list of pseudo-code strings, one per line.
-
-    Raises:
-        KeyError: If *algorithm_name* is not a recognised algorithm.
+        algorithm_name: Tên cần tìm trong PSEUDOCODE.
+    
+    Return:
+        Danh sách các dòng giả mã.
     """
     return PSEUDOCODE[algorithm_name]

@@ -1,8 +1,6 @@
-"""Data generator for benchmarking and visualization.
+"""File này tạo dữ liệu mẫu cho chương trình.
 
-Provides factory functions that create integer arrays of various
-distributions (random, sorted, reversed) used both by the GUI's
-configuration panel and by the benchmark runner.
+Dữ liệu có thể là random, đã sắp xếp tăng dần hoặc sắp xếp giảm dần.
 """
 
 from __future__ import annotations
@@ -12,18 +10,15 @@ from typing import List
 
 
 def generate_random(n: int, low: int = 1, high: int = 1000) -> List[int]:
-    """Generate a list of *n* uniformly random integers.
-
+    """Tạo một mảng số nguyên ngẫu nhiên.
+    
     Args:
-        n: Number of elements.
-        low: Lower bound (inclusive) for each element.
-        high: Upper bound (inclusive) for each element.
-
-    Returns:
-        A new ``list[int]`` of length *n*.
-
-    Raises:
-        ValueError: If *n* is non-positive.
+        n: Số phần tử cần tạo.
+        low: Giá trị nhỏ nhất có thể có.
+        high: Giá trị lớn nhất có thể có.
+    
+    Return:
+        Một mảng số nguyên random.
     """
     if n <= 0:
         raise ValueError(f"n must be positive, got {n}")
@@ -31,18 +26,15 @@ def generate_random(n: int, low: int = 1, high: int = 1000) -> List[int]:
 
 
 def generate_sorted(n: int, low: int = 1, high: int = 1000) -> List[int]:
-    """Generate a sorted list of *n* integers.
-
+    """Tạo một mảng đã sắp xếp tăng dần.
+    
     Args:
-        n: Number of elements.
-        low: Lower bound (inclusive).
-        high: Upper bound (inclusive).
-
-    Returns:
-        A sorted ``list[int]`` of length *n*.
-
-    Raises:
-        ValueError: If *n* is non-positive.
+        n: Số phần tử cần tạo.
+        low: Giá trị nhỏ nhất có thể có.
+        high: Giá trị lớn nhất có thể có.
+    
+    Return:
+        Một mảng số nguyên đã sắp xếp tăng dần.
     """
     if n <= 0:
         raise ValueError(f"n must be positive, got {n}")
@@ -52,18 +44,15 @@ def generate_sorted(n: int, low: int = 1, high: int = 1000) -> List[int]:
 
 
 def generate_reversed(n: int, low: int = 1, high: int = 1000) -> List[int]:
-    """Generate a reverse-sorted list of *n* integers.
-
+    """Tạo một mảng đã sắp xếp giảm dần.
+    
     Args:
-        n: Number of elements.
-        low: Lower bound (inclusive).
-        high: Upper bound (inclusive).
-
-    Returns:
-        A reverse-sorted ``list[int]`` of length *n*.
-
-    Raises:
-        ValueError: If *n* is non-positive.
+        n: Số phần tử cần tạo.
+        low: Giá trị nhỏ nhất có thể có.
+        high: Giá trị lớn nhất có thể có.
+    
+    Return:
+        Một mảng số nguyên đã sắp xếp giảm dần.
     """
     if n <= 0:
         raise ValueError(f"n must be positive, got {n}")
@@ -78,19 +67,16 @@ def generate_array(
     low: int = 1,
     high: int = 1000,
 ) -> List[int]:
-    """Dispatch to the appropriate generator based on *input_type*.
-
+    """Tạo mảng theo kiểu được chọn.
+    
     Args:
-        n: Number of elements.
-        input_type: One of ``"Random"``, ``"Sorted"``, or ``"Reversed"``.
-        low: Lower bound (inclusive).
-        high: Upper bound (inclusive).
-
-    Returns:
-        A ``list[int]`` of the requested distribution.
-
-    Raises:
-        ValueError: If *input_type* is not recognised.
+        n: Số phần tử cần tạo.
+        input_type: Kiểu mảng, gồm ``Random``, ``Sorted`` hoặc ``Reversed``.
+        low: Giá trị nhỏ nhất có thể có.
+        high: Giá trị lớn nhất có thể có.
+    
+    Return:
+        Một mảng số nguyên theo đúng kiểu được chọn.
     """
     factories = {
         "Random": generate_random,

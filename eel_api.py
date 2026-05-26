@@ -1,15 +1,6 @@
-"""Eel-exposed Python functions — bridge between JS and src/core.
+"""File này là cầu nối giữa JavaScript và Python.
 
-Every function decorated with ``@eel.expose`` becomes callable from
-JavaScript via ``eel.<function_name>(args)()``.  This module is imported
-by ``main.py`` purely for its side-effect of registering these functions
-with the Eel runtime.
-
-Design note:
-    Python generators cannot be streamed directly to JS.  Instead, each
-    ``get_*_steps`` function runs the generator to completion, collects
-    every yielded :class:`Step` into a list of plain dicts (via
-    ``dataclasses.asdict``), and returns the full list as JSON.
+Các hàm có ``@eel.expose`` sẽ được giao diện web gọi. Em dùng file này để lấy mảng, lấy các bước mô phỏng, chạy benchmark và chạy cấu trúc dữ liệu.
 """
 
 from __future__ import annotations
@@ -55,14 +46,16 @@ _DS_DISPLAY_NAMES = {
 
 @eel.expose
 def generate_array(size: int, input_type: str) -> List[int]:
-    """Generate an array for visualisation.
-
+    """Tạo mảng theo kiểu được chọn.
+    
     Args:
-        size: Number of elements (5–200).
-        input_type: ``"random"`` | ``"sorted"`` | ``"reversed"``.
-
-    Returns:
-        A list of integers of the requested distribution.
+        n: Số phần tử cần tạo.
+        input_type: Kiểu mảng, gồm ``Random``, ``Sorted`` hoặc ``Reversed``.
+        low: Giá trị nhỏ nhất có thể có.
+        high: Giá trị lớn nhất có thể có.
+    
+    Return:
+        Một mảng số nguyên theo đúng kiểu được chọn.
     """
     type_map = {
         "random": "Random",
@@ -79,17 +72,15 @@ def get_sort_steps(
     algorithm: str,
     options: Optional[Dict[str, Any]] = None,
 ) -> List[Dict[str, Any]]:
-    """Run a sorting generator to completion and return all steps.
-
+    """Chạy thuật toán sắp xếp và lấy các bước mô phỏng.
+    
     Args:
-        arr: The array to sort.
-        algorithm: ``"quicksort"`` | ``"heapsort"`` | ``"mergesort"``.
-        options: Optional dict with algorithm-specific options.
-            For QuickSort: ``{"pivot_strategy": "first"|"last"|"middle"|"median3"}``.
-
-    Returns:
-        A list of step dicts, each JSON-serialisable via
-        ``dataclasses.asdict``.
+        arr: Mảng cần sắp xếp.
+        algorithm: Tên thuật toán cần chạy.
+        options: Tùy chọn thêm, ví dụ cách chọn pivot của QuickSort.
+    
+    Return:
+        Danh sách các bước ở dạng dict.
     """
     if options is None:
         options = {}
@@ -113,16 +104,14 @@ def get_sort_steps(
 
 @eel.expose
 def get_search_steps(arr: List[int], target: int) -> List[Dict[str, Any]]:
-    """Run binary_search_gen and return all steps.
-
-    The array is sorted internally before searching.
-
+    """Chạy tìm kiếm nhị phân và lấy các bước mô phỏng.
+    
     Args:
-        arr: The array (will be sorted before search).
-        target: The value to find.
-
-    Returns:
-        A list of step dicts.
+        arr: Mảng ban đầu, hàm sẽ sắp xếp trước khi tìm.
+        target: Giá trị cần tìm.
+    
+    Return:
+        Danh sách các bước ở dạng dict.
     """
     sorted_arr = sorted(arr)
     steps = list(binary_search_gen(sorted_arr, int(target)))
@@ -131,13 +120,13 @@ def get_search_steps(arr: List[int], target: int) -> List[Dict[str, Any]]:
 
 @eel.expose
 def get_pseudocode(algorithm: str) -> List[str]:
-    """Return pseudo-code lines for the given algorithm.
-
+    """Lấy giả mã của thuật toán.
+    
     Args:
-        algorithm: Lower-case algorithm key, e.g. ``"quicksort"``.
-
-    Returns:
-        A list of pseudo-code strings.
+        algorithm: Tên thuật toán ở dạng chữ thường.
+    
+    Return:
+        Danh sách các dòng giả mã.
     """
     display = _ALGO_DISPLAY_NAMES.get(algorithm.lower(), "")
     return PSEUDOCODE.get(display, [])
@@ -145,10 +134,10 @@ def get_pseudocode(algorithm: str) -> List[str]:
 
 @eel.expose
 def run_benchmark() -> None:
-    """Run the benchmark suite in a daemon thread.
-
-    Each result line is streamed back to JS via
-    ``eel.on_benchmark_line()``.
+    """Chạy benchmark trong một luồng riêng.
+    
+    Return:
+        Không trả về gì.
     """
     _benchmark_cancel_requested.clear()
 
@@ -168,23 +157,23 @@ def run_benchmark() -> None:
 
 @eel.expose
 def cancel_benchmark() -> None:
-    """Request cancellation of the running benchmark suite.
-
-    The current timed sort run is allowed to finish; cancellation is
-    checked before the next run starts.
+    """Yêu cầu dừng benchmark.
+    
+    Return:
+        Không trả về gì.
     """
     _benchmark_cancel_requested.set()
 
 
 @eel.expose
 def get_sorted_array(arr: List[int]) -> List[int]:
-    """Return a sorted copy of the array (used for binary search setup).
-
+    """Tạo bản sao đã sắp xếp của mảng.
+    
     Args:
-        arr: The unsorted array.
-
-    Returns:
-        A sorted copy.
+        arr: Mảng ban đầu.
+    
+    Return:
+        Mảng mới đã được sắp xếp tăng dần.
     """
     return sorted(arr)
 
@@ -196,14 +185,14 @@ def get_ds_steps(
     ds_type: str,
     operations: List[Dict[str, Any]],
 ) -> List[Dict[str, Any]]:
-    """Chạy chuỗi thao tác trên cấu trúc dữ liệu và trả về các bước.
-
+    """Chạy các thao tác trên cấu trúc dữ liệu.
+    
     Args:
-        ds_type: ``"stack"`` | ``"queue"`` | ``"linkedlist"`` | ``"bst"``.
-        operations: Danh sách dict, mỗi dict có ``"op"`` và tùy chọn ``"value"``.
-
-    Returns:
-        Danh sách step dicts.
+        ds_type: Loại cấu trúc dữ liệu.
+        operations: Danh sách thao tác cần chạy.
+    
+    Return:
+        Danh sách các bước ở dạng dict.
     """
     steps = list(run_ds_operations(ds_type.lower(), operations))
     return [asdict(s) for s in steps]
@@ -211,13 +200,13 @@ def get_ds_steps(
 
 @eel.expose
 def get_ds_pseudocode(ds_type: str) -> List[str]:
-    """Trả về danh sách pseudo-code cho cấu trúc dữ liệu.
-
+    """Lấy giả mã của cấu trúc dữ liệu.
+    
     Args:
-        ds_type: ``"stack"`` | ``"queue"`` | ``"linkedlist"`` | ``"bst"``.
-
-    Returns:
-        Danh sách các dòng pseudo-code.
+        ds_type: Loại cấu trúc dữ liệu.
+    
+    Return:
+        Danh sách các dòng giả mã.
     """
     display = _DS_DISPLAY_NAMES.get(ds_type.lower(), "")
     return PSEUDOCODE.get(display, [])

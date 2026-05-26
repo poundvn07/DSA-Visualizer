@@ -1,507 +1,462 @@
-"""Các hàm tạo (generator) thuật toán để mô phỏng quá trình sắp xếp và tìm kiếm.
+"""Các thuật toán dùng cho phần mô phỏng và benchmark.
 
-Mỗi hàm trong file này là một **Python generator**. Hàm nhận vào một danh sách ``list[int]`` 
-(và giá trị cần tìm nếu là thuật toán tìm kiếm), sau đó sinh ra (yield) các đối tượng 
-:class:`~src.core.step.Step` để mô tả từng thao tác nhỏ nhất (như so sánh, hoán đổi).
-
-Quy tắc thiết kế
------------------
-* Danh sách ban đầu truyền vào **không bao giờ bị thay đổi**; mỗi hàm sẽ tạo một bản sao 
-  để thao tác.
-* ``Step.array_state`` luôn là một **bản sao mới** của danh sách tại thời điểm được sinh ra. 
-  Điều này giúp an toàn khi lưu trạng thái để xem lại các bước trước đó.
-* Các bộ đếm tổng số lần ``comparisons`` (so sánh) và ``swaps`` (hoán đổi) được cập nhật 
-  và lưu vào từng bước (step).
+File này có hai loại hàm:
+- Hàm có đuôi ``_gen``: tạo ra từng bước để giao diện vẽ.
+- Hàm có đuôi ``_plain``: chỉ sắp xếp mảng, không tạo bước.
 """
-
-from __future__ import annotations
 
 import sys
 from typing import Generator, List
 
 from src.core.step import Step
 
-# Increase recursion limit for large-array quicksort during benchmarks.
 sys.setrecursionlimit(100_000)
 
-
-# ──────────────────────────────────────────────────────────────────────
-#  QuickSort  (Lomuto partition scheme, configurable pivot strategy)
-# ──────────────────────────────────────────────────────────────────────
 
 def quick_sort_gen(
     arr: List[int],
     pivot_strategy: str = "last",
 ) -> Generator[Step, None, None]:
-    """Tạo các bước mô phỏng cho thuật toán QuickSort (phân hoạch Lomuto).
-
-    Cách phân hoạch Lomuto sẽ duyệt qua mảng con từ trái sang phải một lần duy nhất. 
-    Phần tử chốt (pivot) được chọn theo ``pivot_strategy`` (chiến lược chọn chốt) 
-    và sau đó được chuyển xuống cuối mảng trước khi bắt đầu phân hoạch.
-
+    """Tạo các bước mô phỏng cho thuật toán QuickSort.
+    
+    Hàm này copy mảng ban đầu rồi sắp xếp bằng QuickSort. Trong lúc chạy, hàm tạo Step để giao diện thấy bước chọn pivot, so sánh và đổi chỗ.
+    
     Args:
-        arr: Danh sách các số nguyên cần sắp xếp. Hàm sẽ tạo một bản sao bên trong; 
-            danh sách gốc không bao giờ bị thay đổi.
-        pivot_strategy: Cách chọn chốt, gồm ``"first"`` (đầu), ``"last"`` (cuối), 
-            ``"middle"`` (giữa), hoặc ``"median3"`` (trung vị của 3 phần tử). 
-            Mặc định là ``"last"`` (Lomuto cổ điển).
-
-    Yields:
-        Step: Mỗi bước tương ứng với một lần so sánh, hoán đổi, hoặc chọn chốt.
-
-    Example:
-
-        for step in quick_sort_gen([5, 3, 8, 1]):
-            print(step.description)
+        arr: Mảng số nguyên cần sắp xếp.
+        pivot_strategy: Cách chọn pivot, gồm ``first``, ``last``, ``middle`` hoặc ``median3``.
+    
+    Yield:
+        Step: Một bước mô phỏng của QuickSort.
     """
     data = list(arr)
-    counters = {"comparisons": 0, "swaps": 0}
+    comparisons = 0
+    swaps = 0
 
-    def _pick_pivot(low: int, high: int) -> int:
-        """Trả về vị trí (index) của phần tử được chọn làm chốt (pivot).
-
+    def choose_pivot(first: int, last: int) -> int:
+        """Chọn vị trí pivot cho đoạn mảng hiện tại.
+        
         Args:
-            low: Vị trí bắt đầu (bao gồm).
-            high: Vị trí kết thúc (bao gồm).
-
-        Returns:
-            Vị trí của phần tử chốt được chọn.
+            first: Vị trí đầu của đoạn mảng.
+            last: Vị trí cuối của đoạn mảng.
+        
+        Return:
+            Vị trí của phần tử được chọn làm pivot.
         """
-        mid = (low + high) // 2
+        mid = (first + last) // 2
         if pivot_strategy == "first":
-            return low
+            return first
         elif pivot_strategy == "middle":
             return mid
         elif pivot_strategy == "median3":
-            candidates = [
-                (data[low], low),
-                (data[mid], mid),
-                (data[high], high),
-            ]
-            candidates.sort(key=lambda x: x[0])
-            return candidates[1][1]  # median index
-        else:  # "last" (default)
-            return high
+            choices = [(data[first], first), (data[mid], mid), (data[last], last)]
+            choices.sort()
+            return choices[1][1]
+        return last
 
-    def _sub(low: int, high: int, depth: int) -> dict:
-        """Tạo dict extra chứa thông tin mảng con cho renderer."""
-        return {"subarray": {"left": low, "right": high, "depth": depth}}
-
-    def _partition(
-        low: int, high: int, depth: int,
-    ) -> Generator[Step, None, int]:
-        """Phân hoạch mảng ``data[low..high]`` theo phương pháp Lomuto.
-
-        Phần tử chốt sẽ được đưa về vị trí cuối ``data[high]`` trước khi duyệt.
-
+    def subarray(first: int, last: int, depth: int) -> dict:
+        """Tạo thông tin đoạn mảng đang xử lý.
+        
         Args:
-            low: Vị trí bắt đầu (bao gồm).
-            high: Vị trí kết thúc (bao gồm).
-            depth: Cấp đệ quy hiện tại (0 = gốc).
-
-        Yields:
-            Step: Các bước chọn chốt, so sánh và hoán đổi.
-
-        Returns:
-            Vị trí chính xác của phần tử chốt sau khi phân hoạch xong.
+            first: Vị trí đầu của đoạn mảng.
+            last: Vị trí cuối của đoạn mảng.
+            depth: Độ sâu đệ quy hiện tại.
+        
+        Return:
+            Dict chứa thông tin đoạn mảng.
         """
-        # Pick pivot according to strategy and move it to the end.
-        pivot_idx = _pick_pivot(low, high)
-        if pivot_idx != high:
-            data[pivot_idx], data[high] = data[high], data[pivot_idx]
-            counters["swaps"] += 1
+        return {"subarray": {"left": first, "right": last, "depth": depth}}
 
-        pivot = data[high]
+    def partition(first: int, last: int, depth: int) -> Generator[Step, None, int]:
+        """Chia đoạn mảng thành hai bên theo pivot.
+        
+        Args:
+            first: Vị trí đầu của đoạn mảng.
+            last: Vị trí cuối của đoạn mảng.
+            depth: Độ sâu đệ quy hiện tại.
+        
+        Yield:
+            Step: Các bước chọn pivot, so sánh và đổi chỗ.
+        
+        Return:
+            Vị trí cuối cùng của pivot.
+        """
+        nonlocal comparisons, swaps
+
+        pivot_index = choose_pivot(first, last)
+        if pivot_index != first:
+            data[first], data[pivot_index] = data[pivot_index], data[first]
+            swaps += 1
+
+        pivot_value = data[first]
         yield Step(
             type="pivot",
-            indices=[high],
+            indices=[first],
             array_state=list(data),
             description=(
-                f"Pivot selected: arr[{high}] = {pivot}"
+                f"Pivot selected: arr[{first}] = {pivot_value}"
                 f" (strategy: {pivot_strategy})"
             ),
             highlight_line=1,
-            comparisons=counters["comparisons"],
-            swaps=counters["swaps"],
-            extra=_sub(low, high, depth),
+            comparisons=comparisons,
+            swaps=swaps,
+            extra=subarray(first, last, depth),
         )
 
-        i = low - 1
-        for j in range(low, high):
-            counters["comparisons"] += 1
-            cmp_sym = "≤" if data[j] <= pivot else ">"
-            yield Step(
-                type="compare",
-                indices=[j, high],
-                array_state=list(data),
-                description=(
-                    f"Comparing arr[{j}]={data[j]} with pivot={pivot}"
-                    f" — {data[j]} {cmp_sym} {pivot}"
-                ),
-                highlight_line=3,
-                comparisons=counters["comparisons"],
-                swaps=counters["swaps"],
-                extra=_sub(low, high, depth),
-            )
+        left_mark = first + 1
+        right_mark = last
+        done = False
 
-            if data[j] <= pivot:
-                i += 1
-                if i != j:
-                    data[i], data[j] = data[j], data[i]
-                    counters["swaps"] += 1
-                    yield Step(
-                        type="swap",
-                        indices=[i, j],
-                        array_state=list(data),
-                        description=(
-                            f"Swapping arr[{i}]={data[i]} ↔ arr[{j}]={data[j]}"
-                            f" (moving smaller element left of pivot)"
-                        ),
-                        highlight_line=5,
-                        comparisons=counters["comparisons"],
-                        swaps=counters["swaps"],
-                        extra=_sub(low, high, depth),
-                    )
-
-        # Place pivot in its correct position.
-        i += 1
-        if i != high:
-            data[i], data[high] = data[high], data[i]
-            counters["swaps"] += 1
-            yield Step(
-                type="swap",
-                indices=[i, high],
-                array_state=list(data),
-                description=(
-                    f"Place pivot {data[i]} at position {i}"
-                    f" (swap arr[{i}] ↔ arr[{high}])"
-                ),
-                highlight_line=7,
-                comparisons=counters["comparisons"],
-                swaps=counters["swaps"],
-                extra=_sub(low, high, depth),
-            )
-
-        return i
-
-    def _quicksort(
-        low: int, high: int, depth: int = 0,
-    ) -> Generator[Step, None, None]:
-        """Hàm đệ quy thực hiện QuickSort.
-
-        Args:
-            low: Vị trí bắt đầu (bao gồm).
-            high: Vị trí kết thúc (bao gồm).
-            depth: Cấp đệ quy hiện tại.
-
-        Yields:
-            Step: Tất cả các bước phân hoạch và gọi đệ quy.
-        """
-        if low < high:
-            # _partition is a generator that returns its final value via
-            # ``return``.  We capture that value with a wrapper pattern.
-            part_gen = _partition(low, high, depth)
-            pivot_index = None
-            try:
-                while True:
-                    step = next(part_gen)
-                    yield step
-            except StopIteration as exc:
-                pivot_index = exc.value
-
-            yield from _quicksort(low, pivot_index - 1, depth + 1)
-            yield from _quicksort(pivot_index + 1, high, depth + 1)
-
-    if len(data) > 1:
-        yield from _quicksort(0, len(data) - 1)
-
-
-# ──────────────────────────────────────────────────────────────────────
-#  HeapSort
-# ──────────────────────────────────────────────────────────────────────
-
-def heap_sort_gen(arr: List[int]) -> Generator[Step, None, None]:
-    """Tạo các bước mô phỏng cho thuật toán HeapSort (Sắp xếp vun đống).
-
-    Thuật toán HeapSort diễn ra trong 2 giai đoạn:
-
-    1. **Tạo max-heap (đống lớn nhất)** — gọi hàm ``sift_down`` từ nút cha cuối cùng 
-       ngược lên nút gốc để tạo cấu trúc đống.
-    2. **Trích xuất phần tử lớn nhất** — liên tục hoán đổi nút gốc (phần tử lớn nhất) 
-       xuống cuối mảng (phần chưa sắp xếp) và vun đống lại từ đầu.
-
-    Args:
-        arr: Danh sách các số nguyên cần sắp xếp. Hàm sẽ tạo một bản sao bên trong.
-
-    Yields:
-        Step: Mỗi bước tương ứng với một lần so sánh hoặc hoán đổi khi vun đống và trích xuất.
-
-    Example:
-
-        for step in heap_sort_gen([4, 10, 3, 5, 1]):
-            print(step.description)
-    """
-    data = list(arr)
-    n = len(data)
-    counters = {"comparisons": 0, "swaps": 0}
-
-    def _sift_down(start: int, end: int) -> Generator[Step, None, None]:
-        """Vun đống phần tử tại vị trí *start* xuống dưới để duy trì tính chất của đống.
-
-        Args:
-            start: Vị trí của phần tử cần vun xuống.
-            end: Vị trí hợp lệ cuối cùng trong vùng đang xét của đống.
-
-        Yields:
-            Step: Các bước so sánh và hoán đổi.
-        """
-        root = start
-        while True:
-            child = 2 * root + 1
-            if child > end:
-                break
-
-            # Pick the larger child.
-            if child + 1 <= end:
-                counters["comparisons"] += 1
-                left_val = data[child]
-                right_val = data[child + 1]
-                larger = "right" if right_val > left_val else "left"
+        while not done:
+            while left_mark <= right_mark:
+                comparisons += 1
                 yield Step(
                     type="compare",
-                    indices=[child, child + 1],
+                    indices=[left_mark, first],
                     array_state=list(data),
                     description=(
-                        f"Heapify: comparing children"
-                        f" arr[{child}]={left_val} and"
-                        f" arr[{child + 1}]={right_val}"
-                        f" — {larger} child is larger"
+                        f"Comparing arr[{left_mark}]={data[left_mark]} with pivot={pivot_value}"
+                        f" — {data[left_mark]} {'≤' if data[left_mark] <= pivot_value else '>'} {pivot_value}"
                     ),
                     highlight_line=3,
-                    comparisons=counters["comparisons"],
-                    swaps=counters["swaps"],
+                    comparisons=comparisons,
+                    swaps=swaps,
+                    extra=subarray(first, last, depth),
                 )
-                if data[child + 1] > data[child]:
-                    child += 1
+                if data[left_mark] <= pivot_value:
+                    left_mark += 1
+                else:
+                    break
 
-            # Compare root with the larger child.
-            counters["comparisons"] += 1
-            root_val = data[root]
-            child_val = data[child]
-            needs_swap = root_val < child_val
-            yield Step(
-                type="compare",
-                indices=[root, child],
-                array_state=list(data),
-                description=(
-                    f"Heapify: {child_val} is {'larger' if needs_swap else 'not larger'}"
-                    f" than parent {root_val}"
-                    f"{', sifting down' if needs_swap else ', heap property holds'}"
-                ),
-                highlight_line=5,
-                comparisons=counters["comparisons"],
-                swaps=counters["swaps"],
-            )
-
-            if needs_swap:
-                data[root], data[child] = data[child], data[root]
-                counters["swaps"] += 1
+            while right_mark >= left_mark:
+                comparisons += 1
                 yield Step(
-                    type="swap",
-                    indices=[root, child],
+                    type="compare",
+                    indices=[right_mark, first],
                     array_state=list(data),
                     description=(
-                        f"Heapify: swap arr[{root}]={data[root]}"
-                        f" ↔ arr[{child}]={data[child]}"
+                        f"Comparing arr[{right_mark}]={data[right_mark]} with pivot={pivot_value}"
+                        f" — {data[right_mark]} {'≥' if data[right_mark] >= pivot_value else '<'} {pivot_value}"
                     ),
-                    highlight_line=6,
-                    comparisons=counters["comparisons"],
-                    swaps=counters["swaps"],
+                    highlight_line=3,
+                    comparisons=comparisons,
+                    swaps=swaps,
+                    extra=subarray(first, last, depth),
                 )
-                root = child
+                if data[right_mark] >= pivot_value:
+                    right_mark -= 1
+                else:
+                    break
+
+            if right_mark < left_mark:
+                done = True
             else:
-                break
+                data[left_mark], data[right_mark] = data[right_mark], data[left_mark]
+                swaps += 1
+                yield Step(
+                    type="swap",
+                    indices=[left_mark, right_mark],
+                    array_state=list(data),
+                    description=(
+                        f"Swapping arr[{left_mark}]={data[left_mark]}"
+                        f" ↔ arr[{right_mark}]={data[right_mark]}"
+                    ),
+                    highlight_line=5,
+                    comparisons=comparisons,
+                    swaps=swaps,
+                    extra=subarray(first, last, depth),
+                )
 
-    # Phase 1: Build max-heap.
-    for start_idx in range(n // 2 - 1, -1, -1):
-        yield from _sift_down(start_idx, n - 1)
+        if first != right_mark:
+            data[first], data[right_mark] = data[right_mark], data[first]
+            swaps += 1
+            yield Step(
+                type="swap",
+                indices=[first, right_mark],
+                array_state=list(data),
+                description=(
+                    f"Place pivot {data[right_mark]} at position {right_mark}"
+                    f" (swap arr[{first}] ↔ arr[{right_mark}])"
+                ),
+                highlight_line=7,
+                comparisons=comparisons,
+                swaps=swaps,
+                extra=subarray(first, last, depth),
+            )
+        return right_mark
 
-    # Phase 2: Extract max elements.
-    for end_idx in range(n - 1, 0, -1):
-        data[0], data[end_idx] = data[end_idx], data[0]
-        counters["swaps"] += 1
-        yield Step(
-            type="swap",
-            indices=[0, end_idx],
-            array_state=list(data),
-            description=(
-                f"Extract max: move {data[end_idx]} to position {end_idx}"
-                f" (swap arr[0] ↔ arr[{end_idx}])"
-            ),
-            highlight_line=9,
-            comparisons=counters["comparisons"],
-            swaps=counters["swaps"],
-        )
-        yield from _sift_down(0, end_idx - 1)
+    def quick_sort_helper(first: int, last: int, depth: int = 0) -> Generator[Step, None, None]:
+        """Gọi QuickSort cho một đoạn nhỏ trong mảng.
+        
+        Args:
+            first: Vị trí đầu của đoạn mảng.
+            last: Vị trí cuối của đoạn mảng.
+            depth: Độ sâu đệ quy hiện tại.
+        
+        Yield:
+            Step: Các bước mô phỏng trong đoạn mảng này.
+        """
+        if first < last:
+            pivot_index = yield from partition(first, last, depth)
+            yield from quick_sort_helper(first, pivot_index - 1, depth + 1)
+            yield from quick_sort_helper(pivot_index + 1, last, depth + 1)
+
+    yield from quick_sort_helper(0, len(data) - 1)
 
 
-# ──────────────────────────────────────────────────────────────────────
-#  MergeSort  (top-down, iterative merge)
-# ──────────────────────────────────────────────────────────────────────
-
-def merge_sort_gen(arr: List[int]) -> Generator[Step, None, None]:
-    """Tạo các bước mô phỏng cho thuật toán MergeSort (từ trên xuống).
-
-    Vì MergeSort **không** phải là thuật toán sắp xếp tại chỗ (in-place), chúng ta 
-    duy trì một danh sách ``data`` chung và thực hiện gộp bằng cách ghi đè trực tiếp 
-    lên nó. Mỗi lần đặt một phần tử vào mảng trong lúc gộp sẽ tạo ra một bước ``"set"``.
-
+def heap_sort_gen(arr: List[int]) -> Generator[Step, None, None]:
+    """Tạo các bước mô phỏng cho thuật toán HeapSort.
+    
+    Hàm này copy mảng ban đầu, tạo max heap rồi đưa phần tử lớn nhất về cuối mảng từng lần.
+    
     Args:
-        arr: Danh sách các số nguyên cần sắp xếp. Hàm sẽ tạo một bản sao bên trong.
-
-    Yields:
-        Step: Mỗi bước tương ứng với một lần so sánh hoặc đặt phần tử trong quá trình gộp.
-
-    Example:
-
-        for step in merge_sort_gen([38, 27, 43, 3, 9, 82, 10]):
-            print(step.description)
+        arr: Mảng số nguyên cần sắp xếp.
+    
+    Yield:
+        Step: Một bước so sánh hoặc đổi chỗ của HeapSort.
     """
     data = list(arr)
-    counters = {"comparisons": 0, "swaps": 0}
+    comparisons = 0
+    swaps = 0
+    n = len(data)
 
-    def _sub(left: int, right: int, depth: int) -> dict:
-        """Tạo dict extra chứa thông tin mảng con cho renderer."""
+    def heapify(heap_size: int, i: int) -> Generator[Step, None, None]:
+        """Sửa lại heap bắt đầu từ một vị trí.
+        
+        Args:
+            heap_size: Số phần tử còn nằm trong heap.
+            i: Vị trí gốc đang cần kiểm tra.
+        
+        Yield:
+            Step: Các bước so sánh và đổi chỗ khi sửa heap.
+        """
+        nonlocal comparisons, swaps
+
+        largest = i
+        left = 2 * i + 1
+        right = 2 * i + 2
+
+        if left < heap_size:
+            comparisons += 1
+            left_is_larger = data[left] > data[largest]
+            yield Step(
+                type="compare",
+                indices=[left, largest],
+                array_state=list(data),
+                description=(
+                    f"Heapify: arr[{left}]={data[left]} is "
+                    f"{'larger' if left_is_larger else 'not larger'} than arr[{largest}]={data[largest]}"
+                ),
+                highlight_line=5,
+                comparisons=comparisons,
+                swaps=swaps,
+            )
+            if left_is_larger:
+                largest = left
+
+        if right < heap_size:
+            comparisons += 1
+            right_is_larger = data[right] > data[largest]
+            yield Step(
+                type="compare",
+                indices=[right, largest],
+                array_state=list(data),
+                description=(
+                    f"Heapify: arr[{right}]={data[right]} is "
+                    f"{'larger' if right_is_larger else 'not larger'} than arr[{largest}]={data[largest]}"
+                ),
+                highlight_line=5,
+                comparisons=comparisons,
+                swaps=swaps,
+            )
+            if right_is_larger:
+                largest = right
+
+        if largest != i:
+            data[i], data[largest] = data[largest], data[i]
+            swaps += 1
+            yield Step(
+                type="swap",
+                indices=[i, largest],
+                array_state=list(data),
+                description=(
+                    f"Heapify: swap arr[{i}]={data[i]}"
+                    f" ↔ arr[{largest}]={data[largest]}"
+                ),
+                highlight_line=6,
+                comparisons=comparisons,
+                swaps=swaps,
+            )
+            yield from heapify(heap_size, largest)
+
+    for i in range(n // 2 - 1, -1, -1):
+        yield from heapify(n, i)
+
+    for i in range(n - 1, 0, -1):
+        data[0], data[i] = data[i], data[0]
+        swaps += 1
+        yield Step(
+            type="swap",
+            indices=[0, i],
+            array_state=list(data),
+            description=(
+                f"Extract max: move {data[i]} to position {i}"
+                f" (swap arr[0] ↔ arr[{i}])"
+            ),
+            highlight_line=9,
+            comparisons=comparisons,
+            swaps=swaps,
+        )
+        yield from heapify(i, 0)
+
+
+def merge_sort_gen(arr: List[int]) -> Generator[Step, None, None]:
+    """Tạo các bước mô phỏng cho thuật toán MergeSort.
+    
+    Hàm này copy mảng ban đầu, chia mảng thành hai nửa rồi gộp lại theo thứ tự tăng dần.
+    
+    Args:
+        arr: Mảng số nguyên cần sắp xếp.
+    
+    Yield:
+        Step: Một bước so sánh hoặc ghi giá trị của MergeSort.
+    """
+    data = list(arr)
+    comparisons = 0
+    swaps = 0
+
+    def subarray(left: int, right: int, depth: int) -> dict:
+        """Tạo thông tin đoạn mảng đang xử lý.
+        
+        Args:
+            left: Vị trí đầu của đoạn mảng.
+            right: Vị trí cuối của đoạn mảng.
+            depth: Độ sâu đệ quy hiện tại.
+        
+        Return:
+            Dict chứa thông tin đoạn mảng.
+        """
         return {"subarray": {"left": left, "right": right, "depth": depth}}
 
-    def _merge_sort(
-        left: int, right: int, depth: int = 0,
-    ) -> Generator[Step, None, None]:
-        """Đệ quy chia đôi và gộp mảng ``data[left..right]``.
-
+    def merge_sort_helper(left: int, right: int, depth: int = 0) -> Generator[Step, None, None]:
+        """Chia mảng thành hai nửa rồi gộp lại.
+        
         Args:
-            left: Vị trí bắt đầu (bao gồm).
-            right: Vị trí kết thúc (bao gồm).
-            depth: Cấp đệ quy hiện tại.
-
-        Yields:
-            Step: Các bước so sánh và đặt phần tử trong mỗi lần gộp.
+            left: Vị trí bắt đầu của đoạn mảng.
+            right: Vị trí kết thúc, không lấy vị trí này.
+            depth: Độ sâu đệ quy hiện tại.
+        
+        Yield:
+            Step: Các bước so sánh và ghi lại khi gộp mảng.
         """
-        if left >= right:
+        nonlocal comparisons, swaps
+
+        if right - left <= 1:
             return
 
         mid = (left + right) // 2
-        yield from _merge_sort(left, mid, depth + 1)
-        yield from _merge_sort(mid + 1, right, depth + 1)
-        yield from _merge(left, mid, right, depth)
+        yield from merge_sort_helper(left, mid, depth + 1)
+        yield from merge_sort_helper(mid, right, depth + 1)
 
-    def _merge(
-        left: int, mid: int, right: int, depth: int,
-    ) -> Generator[Step, None, None]:
-        """Gộp hai nửa đã được sắp xếp là ``data[left..mid]`` và ``data[mid+1..right]``.
+        left_half = data[left:mid]
+        right_half = data[mid:right]
+        i = 0
+        j = 0
+        k = left
 
-        Args:
-            left: Vị trí bắt đầu của nửa trái.
-            mid: Vị trí kết thúc của nửa trái.
-            right: Vị trí kết thúc của nửa phải.
-            depth: Cấp đệ quy hiện tại.
-
-        Yields:
-            Step: Một bước ``"compare"`` (so sánh) cho mỗi cặp và một bước ``"set"`` (đặt) 
-            cho mỗi phần tử được ghi lại vào ``data``.
-        """
-        merged: List[int] = []
-        i, j = left, mid + 1
-
-        while i <= mid and j <= right:
-            counters["comparisons"] += 1
-            left_val = data[i]
-            right_val = data[j]
-            takes_left = left_val <= right_val
+        while i < len(left_half) and j < len(right_half):
+            comparisons += 1
+            left_index = left + i
+            right_index = mid + j
+            take_left = left_half[i] <= right_half[j]
             yield Step(
                 type="compare",
-                indices=[i, j],
+                indices=[left_index, right_index],
                 array_state=list(data),
                 description=(
-                    f"Merge: comparing arr[{i}]={left_val} and"
-                    f" arr[{j}]={right_val}"
-                    f" — taking {'left' if takes_left else 'right'}"
+                    f"Merge: comparing arr[{left_index}]={left_half[i]} and"
+                    f" arr[{right_index}]={right_half[j]}"
+                    f" — taking {'left' if take_left else 'right'}"
                 ),
                 highlight_line=4,
-                comparisons=counters["comparisons"],
-                swaps=counters["swaps"],
-                extra=_sub(left, right, depth),
+                comparisons=comparisons,
+                swaps=swaps,
+                extra=subarray(left, right - 1, depth),
             )
-            if takes_left:
-                merged.append(data[i])
+            if take_left:
+                data[k] = left_half[i]
                 i += 1
             else:
-                merged.append(data[j])
+                data[k] = right_half[j]
                 j += 1
-
-        while i <= mid:
-            merged.append(data[i])
-            i += 1
-        while j <= right:
-            merged.append(data[j])
-            j += 1
-
-        # Write merged elements back into the data array.
-        for k, val in enumerate(merged):
-            data[left + k] = val
-            counters["swaps"] += 1  # counted as a "write" / placement
+            swaps += 1
             yield Step(
                 type="set",
-                indices=[left + k],
+                indices=[k],
                 array_state=list(data),
-                description=(
-                    f"Placing {val} into position arr[{left + k}]"
-                    f" (merged write-back)"
-                ),
+                description=f"Placing {data[k]} into position arr[{k}] (merged write-back)",
                 highlight_line=8,
-                comparisons=counters["comparisons"],
-                swaps=counters["swaps"],
-                extra=_sub(left, right, depth),
+                comparisons=comparisons,
+                swaps=swaps,
+                extra=subarray(left, right - 1, depth),
             )
+            k += 1
 
-    if len(data) > 1:
-        yield from _merge_sort(0, len(data) - 1)
+        while i < len(left_half):
+            data[k] = left_half[i]
+            i += 1
+            swaps += 1
+            yield Step(
+                type="set",
+                indices=[k],
+                array_state=list(data),
+                description=f"Placing {data[k]} into position arr[{k}] (merged write-back)",
+                highlight_line=8,
+                comparisons=comparisons,
+                swaps=swaps,
+                extra=subarray(left, right - 1, depth),
+            )
+            k += 1
 
+        while j < len(right_half):
+            data[k] = right_half[j]
+            j += 1
+            swaps += 1
+            yield Step(
+                type="set",
+                indices=[k],
+                array_state=list(data),
+                description=f"Placing {data[k]} into position arr[{k}] (merged write-back)",
+                highlight_line=8,
+                comparisons=comparisons,
+                swaps=swaps,
+                extra=subarray(left, right - 1, depth),
+            )
+            k += 1
 
-# ──────────────────────────────────────────────────────────────────────
-#  Binary Search
-# ──────────────────────────────────────────────────────────────────────
+    yield from merge_sort_helper(0, len(data))
+
 
 def binary_search_gen(
     arr: List[int], target: int
 ) -> Generator[Step, None, None]:
-    """Tạo các bước mô phỏng cho thuật toán Tìm kiếm nhị phân (Binary Search).
-
-    Mảng đầu vào **bắt buộc** phải được sắp xếp tăng dần. Mỗi bước sẽ trả về 
-    khoảng đang xét ``[low, mid, high]`` để giao diện (UI) có thể làm nổi bật 
-    vùng tìm kiếm hiện tại.
-
+    """Tạo các bước mô phỏng cho thuật toán tìm kiếm nhị phân.
+    
+    Hàm này tìm target trong mảng đã được sắp xếp tăng dần.
+    
     Args:
-        arr: Danh sách các số nguyên **đã được sắp xếp** cần tìm kiếm.
-        target: Giá trị số nguyên cần tìm.
-
-    Yields:
-        Step: Mỗi bước là một vòng lặp cho thấy khoảng đang xét và kết quả so sánh. 
-        Bước cuối cùng sẽ có loại là ``"found"`` (đã tìm thấy) hoặc ``"not_found"`` (không tìm thấy).
-
-    Example:
-
-        for step in binary_search_gen([1, 3, 5, 7, 9], 5):
-            print(step.description)
+        arr: Mảng số nguyên đã được sắp xếp.
+        target: Giá trị cần tìm.
+    
+    Yield:
+        Step: Một bước mô phỏng quá trình tìm kiếm.
     """
     data = list(arr)
-    low, high = 0, len(data) - 1
+    low = 0
+    high = len(data) - 1
     comparisons = 0
 
     while low <= high:
         mid = (low + high) // 2
-
-        # Show current search range.
         yield Step(
             type="range",
             indices=[low, mid, high],
@@ -516,7 +471,6 @@ def binary_search_gen(
         )
 
         comparisons += 1
-
         if data[mid] == target:
             yield Step(
                 type="found",
@@ -531,7 +485,8 @@ def binary_search_gen(
                 swaps=0,
             )
             return
-        elif data[mid] < target:
+
+        if data[mid] < target:
             yield Step(
                 type="compare",
                 indices=[mid],
@@ -573,107 +528,151 @@ def binary_search_gen(
     )
 
 
-# ──────────────────────────────────────────────────────────────────────
-#  Plain (non-generator) sort functions for benchmarking
-# ──────────────────────────────────────────────────────────────────────
-
-def quick_sort_plain(arr: List[int]) -> List[int]:
-    """Thuật toán QuickSort chạy trực tiếp (in-place) không kèm mô phỏng.
-
-    Sử dụng phương pháp phân hoạch Lomuto, giống hệt với hàm :func:`quick_sort_gen`
-    nhưng không sinh ra các bước để phục vụ cho việc tính toán hiệu năng (benchmark).
-
+def quick_sort_plain(arr):
+    """Sắp xếp mảng bằng QuickSort.
+    
     Args:
-        arr: Danh sách cần sắp xếp **trực tiếp** (in-place).
-
-    Returns:
-        Cùng là danh sách đó, nhưng đã được sắp xếp tăng dần.
+        arr: Mảng cần sắp xếp trực tiếp.
+    
+    Return:
+        Chính mảng arr sau khi đã sắp xếp.
     """
-    def _partition(low: int, high: int) -> int:
-        pivot = arr[high]
-        i = low - 1
-        for j in range(low, high):
-            if arr[j] <= pivot:
-                i += 1
-                arr[i], arr[j] = arr[j], arr[i]
-        arr[i + 1], arr[high] = arr[high], arr[i + 1]
-        return i + 1
-
-    def _qs(low: int, high: int) -> None:
-        if low < high:
-            p = _partition(low, high)
-            _qs(low, p - 1)
-            _qs(p + 1, high)
-
-    _qs(0, len(arr) - 1)
+    quick_sort_helper(arr, 0, len(arr) - 1)
     return arr
 
-
-def heap_sort_plain(arr: List[int]) -> List[int]:
-    """Thuật toán HeapSort chạy trực tiếp (in-place) không kèm mô phỏng.
-
+def quick_sort_helper(arr, first, last):
+    """Gọi QuickSort cho một đoạn nhỏ trong mảng.
+    
     Args:
-        arr: Danh sách cần sắp xếp **trực tiếp** (in-place).
+        arr: Mảng đang được sắp xếp.
+        first: Vị trí đầu của đoạn mảng.
+        last: Vị trí cuối của đoạn mảng.
+    """
+    if first < last:
+        pivot_index = partition(arr, first, last)
+        quick_sort_helper(arr, first, pivot_index - 1)
+        quick_sort_helper(arr, pivot_index + 1, last)
 
-    Returns:
-        Cùng là danh sách đó, nhưng đã được sắp xếp tăng dần.
+def partition(arr, first, last):
+    """Chia mảng thành hai phía dựa vào pivot.
+    
+    Args:
+        arr: Mảng đang được sắp xếp.
+        first: Vị trí đầu của đoạn mảng.
+        last: Vị trí cuối của đoạn mảng.
+    
+    Return:
+        Vị trí cuối cùng của pivot.
+    """
+    pivot_value = median_of_three(arr, first, last)
+    left_mark = first + 1
+    right_mark = last
+    done = False
+    while not done:
+        while left_mark <= right_mark and arr[left_mark] <= pivot_value:
+            left_mark += 1
+        while arr[right_mark] >= pivot_value and right_mark >= left_mark:
+            right_mark -= 1
+        if right_mark < left_mark:
+            done = True
+        else:
+            arr[left_mark], arr[right_mark] = arr[right_mark], arr[left_mark]
+    arr[first], arr[right_mark] = arr[right_mark], arr[first]
+    return right_mark
+
+def median_of_three(arr, first, last):
+    """Chọn pivot bằng cách lấy trung vị của ba phần tử.
+    
+    Args:
+        arr: Mảng đang được sắp xếp.
+        first: Vị trí đầu của đoạn mảng.
+        last: Vị trí cuối của đoạn mảng.
+    
+    Return:
+        Giá trị pivot được chọn.
+    """
+    mid = (first + last) // 2
+
+    if arr[first] > arr[mid]:
+        arr[first], arr[mid] = arr[mid], arr[first]
+    if arr[first] > arr[last]:
+        arr[first], arr[last] = arr[last], arr[first]
+    if arr[mid] > arr[last]:
+        arr[mid], arr[last] = arr[last], arr[mid]
+
+    arr[first], arr[mid] = arr[mid], arr[first]
+
+    return arr[first]
+
+def heap_sort_plain(arr):
+    """Sắp xếp mảng bằng HeapSort.
+    
+    Args:
+        arr: Mảng cần sắp xếp trực tiếp.
+    
+    Return:
+        Chính mảng arr sau khi đã sắp xếp.
     """
     n = len(arr)
 
-    def _sift_down(start: int, end: int) -> None:
-        root = start
-        while True:
-            child = 2 * root + 1
-            if child > end:
-                break
-            if child + 1 <= end and arr[child + 1] > arr[child]:
-                child += 1
-            if arr[root] < arr[child]:
-                arr[root], arr[child] = arr[child], arr[root]
-                root = child
-            else:
-                break
+    def heapify(a, n, i):
+        """Sửa lại heap từ một vị trí.
+        
+        Args:
+            a: Mảng đang được xử lý.
+            n: Số phần tử trong heap.
+            i: Vị trí gốc đang cần kiểm tra.
+        """
+        largest = i
+        l, r = 2*i+1, 2*i+2
+        if l < n and a[l] > a[largest]:
+            largest = l
+        if r < n and a[r] > a[largest]:
+            largest = r
+        if largest != i:
+            a[i], a[largest] = a[largest], a[i]
+            heapify(a, n, largest)
 
     for i in range(n // 2 - 1, -1, -1):
-        _sift_down(i, n - 1)
-    for end in range(n - 1, 0, -1):
-        arr[0], arr[end] = arr[end], arr[0]
-        _sift_down(0, end - 1)
+        heapify(arr, n, i)
+    for i in range(n - 1, 0, -1):
+        arr[0], arr[i] = arr[i], arr[0]
+        heapify(arr, n, 0)
     return arr
 
-
-def merge_sort_plain(arr: List[int]) -> List[int]:
-    """Thuật toán MergeSort (từ trên xuống) không kèm mô phỏng.
-
+def merge_sort_plain(arr):
+    """Sắp xếp mảng bằng MergeSort.
+    
     Args:
-        arr: Danh sách cần sắp xếp **trực tiếp** (thông qua gộp theo vị trí chỉ mục).
-
-    Returns:
-        Cùng là danh sách đó, nhưng đã được sắp xếp tăng dần.
+        arr: Mảng cần sắp xếp trực tiếp.
+    
+    Return:
+        Chính mảng arr sau khi đã sắp xếp.
     """
-    def _merge_sort(left: int, right: int) -> None:
-        if left >= right:
-            return
-        mid = (left + right) // 2
-        _merge_sort(left, mid)
-        _merge_sort(mid + 1, right)
-        merged = []
-        i, j = left, mid + 1
-        while i <= mid and j <= right:
-            if arr[i] <= arr[j]:
-                merged.append(arr[i])
+    if len(arr) > 1:
+        mid = len(arr) // 2
+        left_half = arr[:mid]
+        right_half = arr[mid:]
+
+        merge_sort_plain(left_half)
+        merge_sort_plain(right_half)
+        i = 0
+        j = 0
+        k = 0
+        while i < len(left_half) and j < len(right_half):
+            if left_half[i] < right_half[j]:
+                arr[k] = left_half[i]
                 i += 1
             else:
-                merged.append(arr[j])
+                arr[k] = right_half[j]
                 j += 1
-        while i <= mid:
-            merged.append(arr[i])
+            k += 1
+        while i < len(left_half):
+            arr[k] = left_half[i]
             i += 1
-        while j <= right:
-            merged.append(arr[j])
+            k += 1
+        while j < len(right_half):
+            arr[k] = right_half[j]
             j += 1
-        for k, val in enumerate(merged):
-            arr[left + k] = val
-
-    _merge_sort(0, len(arr) - 1)
+            k += 1
     return arr

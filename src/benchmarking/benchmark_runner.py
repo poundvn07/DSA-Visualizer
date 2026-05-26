@@ -1,19 +1,6 @@
-"""Benchmark runner for sorting algorithms.
+"""File này dùng để benchmark các thuật toán sắp xếp.
 
-Generates a random list of 1 000 000 integers and times QuickSort,
-HeapSort, and MergeSort over 10 independent runs each.  Results are
-printed in a standardised format and optionally streamed to a callback
-for GUI consumption.
-
-Usage::
-
-    # From the command line:
-    python -m src.benchmarking.benchmark_runner
-
-    # Programmatically (e.g. from the GUI):
-    from src.benchmarking.benchmark_runner import BenchmarkRunner
-    runner = BenchmarkRunner(callback=print)
-    runner.run()
+Nó tạo một mảng random lớn rồi đo thời gian chạy của từng thuật toán.
 """
 
 from __future__ import annotations
@@ -31,18 +18,12 @@ from src.core.algorithms import (
 
 
 class BenchmarkRunner:
-    """Runs timed benchmarks on sorting algorithms.
-
+    """Lớp dùng để đo thời gian chạy của thuật toán sắp xếp.
+    
     Attributes:
-        n: Number of elements in the test array (default 1 000 000).
-        repeats: How many times each algorithm is run (default 10).
-        callback: An optional function called with each output line.
-            When ``None``, output goes to ``sys.stdout``.
-
-    Example::
-
-        runner = BenchmarkRunner(n=500_000, repeats=5)
-        runner.run()
+        n: Số phần tử trong mảng test.
+        repeats: Số lần chạy mỗi thuật toán.
+        callback: Hàm nhận từng dòng kết quả.
     """
 
     # Algorithm registry: display-name → sort function.
@@ -59,14 +40,13 @@ class BenchmarkRunner:
         callback: Optional[Callable[[str], None]] = None,
         should_cancel: Optional[Callable[[], bool]] = None,
     ) -> None:
-        """Initialise the benchmark runner.
-
+        """Tạo một đối tượng benchmark runner.
+        
         Args:
-            n: Size of the array to sort.
-            repeats: Number of independent timed runs per algorithm.
-            callback: If provided, each output line is passed to this
-                callable instead of being printed to stdout.
-            should_cancel: Optional predicate checked between timed runs.
+            n: Số phần tử trong mảng test.
+            repeats: Số lần chạy mỗi thuật toán.
+            callback: Hàm nhận kết quả nếu không muốn in ra terminal.
+            should_cancel: Hàm kiểm tra có cần dừng benchmark không.
         """
         self.n = n
         self.repeats = repeats
@@ -74,10 +54,13 @@ class BenchmarkRunner:
         self.should_cancel = should_cancel or (lambda: False)
 
     def _emit(self, line: str) -> None:
-        """Send one line of output to the callback or stdout.
-
+        """Gửi một dòng kết quả ra ngoài.
+        
         Args:
-            line: The formatted string to emit (no trailing newline).
+            line: Dòng chữ cần in hoặc gửi về giao diện.
+        
+        Return:
+            Không trả về gì.
         """
         if self.callback is not None:
             self.callback(line)
@@ -85,27 +68,18 @@ class BenchmarkRunner:
             print(line)
 
     def _generate_base_array(self) -> List[int]:
-        """Create the master random array of ``self.n`` integers.
-
-        Returns:
-            A ``list[int]`` of length ``self.n`` with values in
-            ``[0, self.n)``.
+        """Tạo mảng random ban đầu cho benchmark.
+        
+        Return:
+            Một mảng số nguyên random.
         """
         return [random.randint(0, self.n) for _ in range(self.n)]
 
     def run(self) -> Dict[str, List[float]]:
-        """Execute the full benchmark suite.
-
-        For each registered algorithm the method:
-
-        1. Prints a header line.
-        2. Runs the sort ``self.repeats`` times on a **fresh copy** of
-           the master array.
-        3. Prints the elapsed time for each run.
-
-        Returns:
-            A dictionary mapping algorithm names to lists of elapsed
-            times (in milliseconds).
+        """Chạy benchmark cho tất cả thuật toán.
+        
+        Return:
+            Dict chứa tên thuật toán và danh sách thời gian chạy.
         """
         base = self._generate_base_array()
         results: Dict[str, List[float]] = {}
@@ -153,9 +127,10 @@ class BenchmarkRunner:
 # ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    """Run benchmarks from the command line.
-
-    Invoked via ``python -m src.benchmarking.benchmark_runner``.
+    """Chạy benchmark khi gọi file bằng command line.
+    
+    Return:
+        Không trả về gì.
     """
     runner = BenchmarkRunner()
     runner.run()

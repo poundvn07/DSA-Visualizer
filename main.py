@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
-"""Entry point for the Algorithm Visualizer & Benchmarking application.
+"""File này là điểm bắt đầu của chương trình.
 
-Launches an Eel-based web UI that communicates with the Python core
-via exposed functions defined in ``eel_api``.
-
-Usage::
-
-    python main.py
+Khi chạy file này, chương trình sẽ mở giao diện web bằng Eel.
 """
 
 from __future__ import annotations
@@ -16,12 +11,10 @@ import eel_api  # noqa: F401 — registers all @eel.expose functions
 
 
 def main() -> None:
-    """Launch the Eel application.
-
-    Initialises the ``web/`` directory as the static file root, then
-    opens ``index.html`` in a Chrome/Edge app-mode window (or the
-    default browser as fallback).  The call to ``eel.start()`` blocks
-    until the user closes the window.
+    """Mở chương trình bằng Eel.
+    
+    Return:
+        Không trả về gì.
     """
     eel.init("web")
     eel.start(

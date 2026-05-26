@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Quick smoke test for all core modules."""
+"""File này test nhanh các phần chính của project.
+
+Nó chỉ dùng để kiểm tra cơ bản khi chạy bằng tay.
+"""
 
 import sys
 import os
